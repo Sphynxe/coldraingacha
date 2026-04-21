@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Draw</title>
+
+<style>
+body {
+  margin: 0;
+  background: white;
+  font-family: sans-serif;
+}
+
+/* Start */
+#startScreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* Main */
+#main {
+  display: none;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* Card */
+.card-box {
+  width: 320px;
+  height: 440px;
+  position: relative;
+}
+
+#realCard, #tearCard, #effect {
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#tearCard {
+  cursor: pointer;
+}
+
+#effect {
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Shake */
+@keyframes shake {
+  0% { transform: translate(0,0); }
+  25% { transform: translate(-2px,1px); }
+  50% { transform: translate(2px,-1px); }
+  75% { transform: translate(-1px,2px); }
+  100% { transform: translate(0,0); }
+}
+
+.shake {
+  animation: shake 0.2s;
+}
+
+/* Button */
+.draw-btn {
+  margin-top: 30px;
+  padding: 14px 40px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f0f0f0, #cfcfcf);
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.2),
+              -4px -4px 10px rgba(255,255,255,0.7);
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="startScreen">
+  <h1>Card Pack</h1>
+  <button class="draw-btn" onclick="startGame()">START</button>
+</div>
+
+<div id="main">
+  <div class="card-box">
+    <img id="realCard" src="">
+    <img id="tearCard" src="" onclick="clickCard()">
+    <img id="effect" src="fire1.gif">
+  </div>
+
+<button class="draw-btn" onclick="startDraw()">DRAW</button>
+
+</div>
+
+<!-- 🎵 SSR音乐 -->
+
+<audio id="bgmSSR" src="sfx1.m4a" loop></audio>
+
+<script>
+const pool = {
+  R: ["r1.png","r2.png"],
+  SR: ["sr1.png"],
+  SSR: ["ssr1.png"]
+};
+
+let clickCount = 0;
+let isOpening = false;
+let currentRarity = "";
+
+/* 初始化 */
+window.onload = function() {
+  document.getElementById("tearCard").src = "tear1.png";
+};
+
+/* Start */
+function startGame() {
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("main").style.display = "flex";
+}
+
+/* 抽卡 */
+function startDraw() {
+  clickCount = 0;
+  isOpening = true;
+
+  // ❗停止SSR音乐
+  let music = document.getElementById("bgmSSR");
+  music.pause();
+  music.currentTime = 0;
+
+  let rand = Math.random();
+
+  if (rand < 0.6) currentRarity = "R";
+  else if (rand < 0.9) currentRarity = "SR";
+  else currentRarity = "SSR";
+
+  let card = pool[currentRarity][Math.floor(Math.random() * pool[currentRarity].length)];
+
+  document.getElementById("realCard").src = card;
+
+  let tear = document.getElementById("tearCard");
+  tear.style.opacity = "1";
+  tear.src = "tear1.png";
+}
+
+/* 撕卡 */
+function clickCard() {
+  if (!isOpening) return;
+
+  clickCount++;
+
+  let tear = document.getElementById("tearCard");
+
+  tear.classList.add("shake");
+  setTimeout(() => tear.classList.remove("shake"), 200);
+
+  if (clickCount === 1) {
+    tear.src = "tear2.png";
+  } else if (clickCount === 2) {
+    tear.src = "tear3.png";
+  } else if (clickCount === 3) {
+    tear.src = "tear4.png";
+
+    if (currentRarity === "SSR") {
+
+      // 🔥 特效
+      let effect = document.getElementById("effect");
+      effect.style.opacity = "1";
+
+      setTimeout(() => {
+        effect.style.opacity = "0";
+      }, 800);
+
+      // 🎵 播放SSR音乐（循环）
+      let music = document.getElementById("bgmSSR");
+      music.currentTime = 0;
+      music.play();
+    }
+
+    // 自动开卡
+    setTimeout(() => {
+      tear.style.opacity = "0";
+      isOpening = false;
+    }, 300);
+  }
+}
+</script>
+
+</body>
+</html>
