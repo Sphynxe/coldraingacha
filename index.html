@@ -3,24 +3,28 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>coldrain Gacha!!!</title>
+
+<!-- ✅ 关键：禁止缩放 -->
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Card Draw</title>
 
 <style>
 body {
   margin: 0;
   background: white;
   font-family: sans-serif;
+
+  /* ✅ 防止双击放大 */
+  touch-action: manipulation;
 }
 
 /* Start */
 #startScreen {
   position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100vh;
-  background: white;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -31,35 +35,38 @@ body {
 #main {
   display: none;
   height: 100vh;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-direction: column;
 }
 
-/* Card */
+/* 卡片 */
 .card-box {
-  width: 320px;
-  height: 440px;
+  width: 80vw;
+  max-width: 400px;
+  aspect-ratio: 3 / 4;
   position: relative;
 }
 
 #realCard, #tearCard, #effect {
   width: 100%;
+  height: 100%;
+  object-fit: contain;
   position: absolute;
-  top: 0;
-  left: 0;
 }
 
 #tearCard {
   cursor: pointer;
 }
 
+/* 特效 */
 #effect {
   pointer-events: none;
   opacity: 0;
 }
 
-/* Shake */
+/* 抖动 */
 @keyframes shake {
   0% { transform: translate(0,0); }
   25% { transform: translate(-2px,1px); }
@@ -72,16 +79,14 @@ body {
   animation: shake 0.2s;
 }
 
-/* Button */
+/* 按钮 */
 .draw-btn {
   margin-top: 30px;
-  padding: 14px 40px;
+  padding: 14px 30px;
   font-size: 18px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(145deg, #f0f0f0, #cfcfcf);
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.2),
-              -4px -4px 10px rgba(255,255,255,0.7);
+  background: #eee;
 }
 </style>
 
@@ -105,8 +110,6 @@ body {
 
 </div>
 
-<!-- 🎵 SSR音乐 -->
-
 <audio id="bgmSSR" src="sfx1.m4a" loop></audio>
 
 <script>
@@ -120,23 +123,19 @@ let clickCount = 0;
 let isOpening = false;
 let currentRarity = "";
 
-/* 初始化 */
 window.onload = function() {
   document.getElementById("tearCard").src = "tear1.png";
 };
 
-/* Start */
 function startGame() {
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("main").style.display = "flex";
 }
 
-/* 抽卡 */
 function startDraw() {
   clickCount = 0;
   isOpening = true;
 
-  // ❗停止SSR音乐
   let music = document.getElementById("bgmSSR");
   music.pause();
   music.currentTime = 0;
@@ -156,7 +155,6 @@ function startDraw() {
   tear.src = "tear1.png";
 }
 
-/* 撕卡 */
 function clickCard() {
   if (!isOpening) return;
 
@@ -175,8 +173,6 @@ function clickCard() {
     tear.src = "tear4.png";
 
     if (currentRarity === "SSR") {
-
-      // 🔥 特效
       let effect = document.getElementById("effect");
       effect.style.opacity = "1";
 
@@ -184,13 +180,11 @@ function clickCard() {
         effect.style.opacity = "0";
       }, 800);
 
-      // 🎵 播放SSR音乐（循环）
       let music = document.getElementById("bgmSSR");
       music.currentTime = 0;
       music.play();
     }
 
-    // 自动开卡
     setTimeout(() => {
       tear.style.opacity = "0";
       isOpening = false;
